@@ -1,0 +1,74 @@
+#!/usr/bin/env bash
+#
+# Dependencies - python 3, terraform, zip
+#
+#
+set -e
+
+CURRENT_DIR=$PWD
+# shellcheck disable=SC1091
+. .env
+make env
+# shellcheck disable=SC1091
+. env/bin/activate
+
+# create lambda zip
+if [[ $SKIP_BUNDLE -ne 1 ]]; then
+	make deps
+	bundlelambda "$LAMBDA_ZIP"
+fi
+
+# run infrastructure update
+cd infra || exit 1
+if [[ ! -d .terraform ]]; then
+	terraform init
+fi
+if ! terraform env list 2>&1 | grep -qi "$ENVIRONMENT"; then
+	terraform env new "$ENVIRONMENT"
+fi
+terraform env select "$ENVIRONMENT"
+
+terraform plan \
+	-var "lambda_filename=$LAMBDA_FILENAME" \
+	-var "region=$REGION" \
+	-var "account_id=$ACCOUNT_ID" \
+	-var "lambda_function_name=$LAMBDA_FUNCTION_NAME" \
+	-var "db_instance_type=$DB_INSTANCE_TYPE" \
+	-var "db_name=$DB_NAME" \
+	-var "db_user=$DB_USER" \
+	-var "db_pass=$DB_PASS" \
+	-var "trusted_cidrs=$TRUSTED_CIDRS"
+
+terraform apply \
+	-var "lambda_filename=$LAMBDA_FILENAME" \
+	-var "region=$REGION" \
+	-var "account_id=$ACCOUNT_ID" \
+	-var "db_instance_type=$DB_INSTANCE_TYPE" \
+	-var "db_name=$DB_NAME" \
+	-var "db_user=$DB_USER" \
+	-var "db_pass=$DB_PASS" \
+	-var "trusted_cidrs=$TRUSTED_CIDRS"
+
+SQLALCHEMY_DATABASE_URI=$(terraform output db_url)
+API_URI="$(terraform output api_url)/healthz"
+
+# run db migrations
+cd "$CURRENT_DIR" || exit 1
+export APP_CONFIG_FILE=$CURRENT_DIR/config/env.py
+export SQLALCHEMY_DATABASE_URI
+python manage.py db upgrade
+
+# test API deployed successfully
+set +e
+RETRIES=60
+MAX_RETRIES=1
+echo "Testing API URL: $API_URI"
+until wget -q --timeout 5 -- "$API_URI"; do
+	if [[ $RETRIES -eq $MAX_RETRIES ]]; then
+		echo "[FAIL] API URL unreachable. Max retry limit of $RETRIES reached."
+		exit 1
+	fi
+	((RETRIES++))
+	sleep 1
+done
+echo "[OK] Deployment successful"
