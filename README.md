@@ -18,7 +18,14 @@ Create `.env` file needed for deployment:
 cp .env.example .env
 ```
 
+### Zip bundle creation
+This must be performed on the same arch as AWS Lambda runtime (Linux) because of the compiled binaries.
+```
+./bin/bundlelambda
+```
+
 ### Deploy
+This will run the zip bundle script and deploy using terraform.
 ```
 ./bin/deploy
 ```

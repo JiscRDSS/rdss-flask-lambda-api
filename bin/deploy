@@ -13,8 +13,8 @@ make env
 . env/bin/activate
 
 # create lambda zip
+# must be on Linux arch because of platform specific compiled binaries
 if [[ $SKIP_BUNDLE -ne 1 ]]; then
-	make deps
 	bundlelambda "$LAMBDA_ZIP"
 fi
 

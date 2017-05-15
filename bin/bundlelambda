@@ -48,10 +48,16 @@ run() {
 		echo "FAIL: missing \$1 argument: output lambda zip filepath"
 		exit 1
 	fi
+	make deps
 	setUp "$1"
 	addDependenciesToZip
 	addToZip app config ./*.py
 	mv "$ARCHIVE_TMP" "$1"
 }
 
-run "$1"
+if [[ $(uname) == 'Linux' ]]; then
+	run "$1"
+else
+	echo "[FAIL]: Wrong platform - could not build lambda zip. Must be built on Linux architecture"
+	exit 1
+fi
