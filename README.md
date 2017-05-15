@@ -48,34 +48,35 @@ source env/bin/activate
 make deps
 ```
 
-### Run Server in Development mode:
+### Local Development Server
 
-1. Create development configuration
+#### 1. Create development configuration
 ```
 cp config/development.py.sample config/development.py
 export APP_CONFIG_FILE=$PWD/config/development.py
 ```
 
-2. Run development DB
-```
-docker-compose run db
-```
+#### 2. Run server
 
-3. Run development server locally
+
+##### In virtualenv
+
 ```
-python manage.py db upgrade
+docker-compose run --service-ports db
 make server-debug
 ```
-Or just
+
+##### In docker
 ```
-python manage.py runserver
-```
-Or through docker:
-```
-doc run --service-ports app
+docker-compose up
 ```
 
-4. Manually test development server
+#### 3. Run Migrations
+```
+python manage.py db upgrade
+```
+
+#### 4. Manually test development server
 ```
 http-prompt localhost:5000
 POST /artists --form name=enya
