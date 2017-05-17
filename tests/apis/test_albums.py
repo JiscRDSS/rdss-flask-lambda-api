@@ -116,7 +116,7 @@ def test_put(server, artist):
         'year': 2011,
     }
 
-    r = requests.put(server.url + '/album/{}'.format(album_id), data=data)
+    r = requests.put(server.url + '/albums/{}'.format(album_id), data=data)
     assert r.status_code == 200
     response_data = r.json()
     assert response_data['isrc'] == data['isrc']
@@ -146,7 +146,7 @@ def test_put_same_isrc(server, artist):
         assert Album.query.count() == 1
 
         data = {'isrc': 'ab-1AB-12-12345'}
-        r = requests.put(server.url + '/album/{}'.format(album_id), data=data)
+        r = requests.put(server.url + '/albums/{}'.format(album_id), data=data)
         assert r.status_code == 200
         assert r.json()['isrc'] == data['isrc']
 
@@ -177,7 +177,7 @@ def test_put_errors(server, artist, data, field):
     with server.app_context():
         assert Album.query.count() == 1
 
-        r = requests.put(server.url + '/album/{}'.format(album_id), data=data)
+        r = requests.put(server.url + '/albums/{}'.format(album_id), data=data)
 
         assert r.status_code == 422
         assert field in r.json()['error']['message']
@@ -192,7 +192,7 @@ def test_delete(server, artist):
 
         assert Album.query.count() == 1
 
-        r = requests.delete(server.url + '/album/{}'.format(artist.id))
+        r = requests.delete(server.url + '/albums/{}'.format(artist.id))
         assert r.status_code == 204
 
     with server.app_context():
@@ -207,7 +207,7 @@ def test_get_one(server, artist):
 
         assert Album.query.count() == 1
 
-        r = requests.get(server.url + '/album/{}'.format(artist.id))
+        r = requests.get(server.url + '/albums/{}'.format(artist.id))
         assert r.status_code == 200
         assert r.json()['name'] == artist.name
 

@@ -10,6 +10,5 @@ pre-commit
 psycopg2
 pytest
 pytest-cov
-pytest-helpers-namespace
 requests
 SQLAlchemy

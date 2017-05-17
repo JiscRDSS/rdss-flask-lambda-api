@@ -3,6 +3,9 @@ from werkzeug.http import HTTP_STATUS_CODES
 
 
 def error_message(code, message):
+    """
+    error_message wraps an error into payload format expected by the API client
+    """
     return jsonify({
         'error': {
             'code': HTTP_STATUS_CODES.get(code, code),

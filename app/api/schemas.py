@@ -19,6 +19,9 @@ def validate_per_page(value):
 
 
 class PaginatorSchema(Schema):
+    """
+    PaginatorSchema is a class for generating pagination
+    """
     page = fields.Integer(default=1, validate=validate_page)
     per_page = fields.Integer(default=10, validate=validate_per_page)
 
@@ -48,6 +51,9 @@ def name_must_be_unique(value):
 
 
 class ArtistSchema(ModelSchema):
+    """
+    ArtistSchema is a class for validating artists
+    """
     name = fields.Str(required=True, validate=name_must_not_be_blank)
 
     class Meta:
@@ -87,6 +93,10 @@ def artist_should_exist(artist_id):
 
 
 class AlbumSchema(ModelSchema):
+    """
+    AlbumSchema is a class for validating albums
+    """
+
     isrc = fields.Str(required=True, validate=isrc_must_be_valid)
     name = fields.Str(required=True, validate=name_must_not_be_blank)
     label = fields.Str(validate=must_not_be_blank('label'))

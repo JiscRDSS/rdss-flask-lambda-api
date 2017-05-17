@@ -59,7 +59,7 @@ def test_put(server):
 
         assert Artist.query.count() == 1
 
-        r = requests.put(server.url + '/artist/{}'.format(artist.id), data={
+        r = requests.put(server.url + '/artists/{}'.format(artist.id), data={
             'name': 'b'
         })
         assert r.status_code == 200
@@ -79,7 +79,7 @@ def test_put_same_name(server):
 
         assert Artist.query.count() == 1
 
-        r = requests.put(server.url + '/artist/{}'.format(artist.id), data={
+        r = requests.put(server.url + '/artists/{}'.format(artist.id), data={
             'name': 'b'
         })
         assert r.status_code == 200
@@ -101,7 +101,7 @@ def test_put_errors(server):
 
         assert Artist.query.count() == 2
 
-        r = requests.put(server.url + '/artist/{}'.format(artist.id), data={
+        r = requests.put(server.url + '/artists/{}'.format(artist.id), data={
             'name': 'b'
         })
         assert r.status_code == 422
@@ -115,7 +115,7 @@ def test_delete(server):
 
         assert Artist.query.count() == 1
 
-        r = requests.delete(server.url + '/artist/{}'.format(artist.id))
+        r = requests.delete(server.url + '/artists/{}'.format(artist.id))
         assert r.status_code == 204
 
     with server.app_context():
@@ -130,7 +130,7 @@ def test_get_one(server):
 
         assert Artist.query.count() == 1
 
-        r = requests.get(server.url + '/artist/{}'.format(artist.id))
+        r = requests.get(server.url + '/artists/{}'.format(artist.id))
         assert r.status_code == 200
         assert r.json()['name'] == artist.name
 

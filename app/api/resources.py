@@ -38,6 +38,10 @@ def handle_healthcheck():
 
 @api.route('/artists', methods=('GET', 'POST'))
 def handle_artists():
+    """
+    handle_artists handles /artists route
+    returns list of artists
+    """
     if request.method == 'POST':
         artist, errors = artist_schema.load(request.form, session=db.session)
         if errors:
@@ -58,8 +62,12 @@ def handle_artists():
     return jsonify(artist_schema.dump(artists, many=True).data)
 
 
-@api.route('/artist/<int:artist_id>', methods=('GET', 'PUT', 'DELETE'))
+@api.route('/artists/<int:artist_id>', methods=('GET', 'PUT', 'DELETE'))
 def handle_artist(artist_id):
+    """
+    handle_artist handles /artists/{} routes
+    returns single of artist indexed by ID
+    """
     if request.method == 'PUT':
         artist = Artist.query.get_or_404(artist_id)
         artist, errors = artist_schema.load(
@@ -91,6 +99,10 @@ def handle_artist(artist_id):
 
 @api.route('/albums', methods=('GET', 'POST'))
 def handle_albums():
+    """
+    handle_albums handles /albums route
+    returns list of albums
+    """
     if request.method == 'POST':
         album, errors = album_schema.load(request.form, session=db.session)
         if errors:
@@ -111,8 +123,12 @@ def handle_albums():
     return jsonify(album_schema.dump(albums, many=True).data)
 
 
-@api.route('/album/<int:album_id>', methods=('GET', 'PUT', 'DELETE'))
+@api.route('/albums/<int:album_id>', methods=('GET', 'PUT', 'DELETE'))
 def handle_album(album_id):
+    """
+    handle_album handles /albums/{} routes
+    returns single of album indexed by ID
+    """
     if request.method == 'PUT':
         album = Album.query.get_or_404(album_id)
         album, errors = album_schema.load(

@@ -58,11 +58,10 @@ export APP_CONFIG_FILE=$PWD/config/development.py
 
 #### 2. Run server
 
-
 ##### In virtualenv
 
 ```
-docker-compose run --service-ports db
+docker-compose run -d --service-ports db
 make server-debug
 ```
 

@@ -2,8 +2,6 @@ import os
 
 import pytest
 
-pytest_plugins = ['helpers_namespace']
-
 
 @pytest.fixture(autouse=True)
 def config_setting():
