@@ -4,7 +4,7 @@ provider "aws" {
 
 terraform {
   backend "s3" {
-    bucket = "rdds-flask-lambda-api-remote-state"
+    bucket = "rdss-taxonomy-api-remote-state"
     key    = "terraform.tfstate"
     region = "eu-west-2"
   }
@@ -26,6 +26,7 @@ module "vpc_subnets" {
   igw_cidr             = "10.0.8.0/24"
   azs                  = ["eu-west-2a", "eu-west-2b"]
   project              = "${var.project}"
+  service              = "${var.service}"
   owner                = "${var.owner}"
   costcenter           = "${var.costcenter}"
 }
@@ -55,7 +56,7 @@ resource "aws_security_group" "all" {
     Owner       = "${var.owner}"
     CostCenter  = "${var.costcenter}"
     managed_by  = "terraform"
-    service     = "${var.project}"
+    service     = "${var.service}"
   }
 }
 
@@ -84,21 +85,20 @@ resource "aws_security_group" "rds" {
     Owner       = "${var.owner}"
     CostCenter  = "${var.costcenter}"
     managed_by  = "terraform"
-    service     = "${var.project}"
+    service     = "${var.service}"
   }
 }
 
 ####################
 # RDS
 ####################
-
 resource "random_id" "random_string" {
   byte_length = 8
 }
 
 module "rds_instance" {
   source                = "./modules/rds"
-  rds_instance_name     = "${var.prefix}-rds-${terraform.env}"
+  rds_instance_name     = "${var.project}-${terraform.env}"
   rds_is_multi_az       = "true"
   rds_storage_type      = "gp2"
   rds_allocated_storage = 10
@@ -113,9 +113,7 @@ module "rds_instance" {
   rds_publicly_accessible = true
 
   /* Uncomment for restoring snapshots */
-  rds_final_snapshot_identifier = "${var.prefix}-${terraform.env}-rds-final"
-
-  # rds_snapshot_identifier = "${var.prefix}-${terraform.env}-rds-final"
+  rds_final_snapshot_identifier = "${var.project}-${terraform.env}-final"
 
   db_parameter_group    = "${aws_db_parameter_group.postgres_parameter_group.name}"
   subnet_az1            = "${element(module.vpc_subnets.public_subnet_ids, 1)}"
@@ -126,22 +124,23 @@ module "rds_instance" {
   project               = "${var.project}"
   owner                 = "${var.owner}"
   costcenter            = "${var.costcenter}"
+  service               = "${var.service}"
   environment           = "${terraform.env}"
 }
 
 resource "aws_db_parameter_group" "postgres_parameter_group" {
-  name        = "${var.prefix}-${terraform.env}-rds-postgres-pg"
+  name        = "${var.project}-${terraform.env}-postgres-pg"
   family      = "postgres${var.postgres_version}"
   description = "RDS postgres parameter group"
 
   tags {
-    Name        = "${var.project}-${terraform.env}-rds-postgres-pg"
+    Name        = "${var.project}-${terraform.env}-postgres-pg"
     Environment = "${terraform.env}"
     Project     = "${var.project}"
     Owner       = "${var.owner}"
     CostCenter  = "${var.costcenter}"
     managed_by  = "terraform"
-    service     = "${var.project}"
+    service     = "${var.service}"
   }
 }
 
@@ -178,7 +177,7 @@ module "lambda" {
 }
 
 resource "aws_s3_bucket" "lambda_repo" {
-  bucket = "${var.prefix}-${var.project}-${terraform.env}"
+  bucket = "lambda_repo-${var.project}-${terraform.env}"
   region = "${var.region}"
 }
 
@@ -196,7 +195,7 @@ data "aws_s3_bucket_object" "lambda_dist_hash" {
 }
 
 resource "aws_iam_role" "lambda_role" {
-  name = "${var.prefix}-${terraform.env}-${var.lambda_name}-role"
+  name = "${var.project}-${terraform.env}-${var.lambda_name}-role"
 
   assume_role_policy = <<EOF
 {

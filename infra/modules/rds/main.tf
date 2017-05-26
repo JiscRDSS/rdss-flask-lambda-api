@@ -25,7 +25,7 @@ resource "aws_db_instance" "rds_instance" {
     Owner       = "${var.owner}"
     CostCenter  = "${var.costcenter}"
     managed_by  = "terraform"
-    service     = "${var.project}"
+    service     = "${var.service}"
   }
 }
 
@@ -41,6 +41,6 @@ resource "aws_db_subnet_group" "rds_subnet_group" {
     Owner       = "${var.owner}"
     CostCenter  = "${var.costcenter}"
     managed_by  = "terraform"
-    service     = "${var.project}"
+    service     = "${var.service}"
   }
 }

@@ -85,6 +85,7 @@ variable "rds_publicly_accessible" {
 }
 
 variable "project" {}
+variable "service" {}
 variable "owner" {}
 variable "environment" {}
 variable "costcenter" {}

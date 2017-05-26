@@ -15,8 +15,8 @@ variable "costcenter" {
   default     = "RDSS"
 }
 
-variable "prefix" {
-  description = "Prefix to be used with resources"
+variable "service" {
+  description = "Service name"
   default     = "rdss"
 }
 

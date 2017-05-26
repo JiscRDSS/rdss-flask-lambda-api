@@ -4,13 +4,13 @@ resource "aws_vpc" "vpc" {
   enable_dns_hostnames = "${var.enable_dns_hostnames}"
 
   tags {
-    Name        = "${var.project}-${terraform.env}-vpc"
+    Name        = "${var.project}-${var.environment}-vpc"
     Environment = "${terraform.env}"
     Project     = "${var.project}"
     Owner       = "${var.owner}"
     CostCenter  = "${var.costcenter}"
     managed_by  = "terraform"
-    service     = "${var.project}"
+    service     = "${var.service}"
   }
 }
 
@@ -18,13 +18,13 @@ resource "aws_internet_gateway" "igw" {
   vpc_id = "${aws_vpc.vpc.id}"
 
   tags {
-    Name        = "igw"
+    Name        = "${var.project}-${var.environment}-igw"
     Environment = "${terraform.env}"
     Project     = "${var.project}"
     Owner       = "${var.owner}"
     CostCenter  = "${var.costcenter}"
     managed_by  = "terraform"
-    service     = "${var.project}"
+    service     = "${var.service}"
   }
 }
 
@@ -36,13 +36,13 @@ resource "aws_subnet" "public" {
   map_public_ip_on_launch = "${var.map_public_ip_on_launch}"
 
   tags {
-    Name        = "public-${count.index}"
+    Name        = "${var.project}-${var.environment}-public-${count.index}"
     Environment = "${terraform.env}"
     Project     = "${var.project}"
     Owner       = "${var.owner}"
     CostCenter  = "${var.costcenter}"
     managed_by  = "terraform"
-    service     = "${var.project}"
+    service     = "${var.service}"
   }
 }
 
@@ -55,7 +55,7 @@ resource "aws_route_table" "public" {
   }
 
   tags {
-    Name        = "public"
+    Name        = "${var.project}-${var.environment}-public"
     Environment = "${terraform.env}"
     Project     = "${var.project}"
     Owner       = "${var.owner}"
@@ -79,13 +79,13 @@ resource "aws_subnet" "private" {
   map_public_ip_on_launch = false
 
   tags {
-    Name        = "private-${count.index}"
+    Name        = "${var.project}-${var.environment}-private-${count.index}"
     Environment = "${terraform.env}"
     Project     = "${var.project}"
     Owner       = "${var.owner}"
     CostCenter  = "${var.costcenter}"
     managed_by  = "terraform"
-    service     = "${var.project}"
+    service     = "${var.service}"
   }
 }
 
@@ -93,13 +93,13 @@ resource "aws_route_table" "private" {
   vpc_id = "${aws_vpc.vpc.id}"
 
   tags {
-    Name        = "private"
+    Name        = "${var.project}-${var.environment}-private"
     Environment = "${terraform.env}"
     Project     = "${var.project}"
     Owner       = "${var.owner}"
     CostCenter  = "${var.costcenter}"
     managed_by  = "terraform"
-    service     = "${var.project}"
+    service     = "${var.service}"
   }
 }
 
@@ -115,13 +115,13 @@ resource "aws_subnet" "igw" {
   map_public_ip_on_launch = false
 
   tags {
-    Name        = "igw"
+    Name        = "${var.project}-${var.environment}-igw"
     Environment = "${terraform.env}"
     Project     = "${var.project}"
     Owner       = "${var.owner}"
     CostCenter  = "${var.costcenter}"
     managed_by  = "terraform"
-    service     = "${var.project}"
+    service     = "${var.service}"
   }
 }
 
@@ -133,13 +133,13 @@ resource "aws_subnet" "nat" {
   map_public_ip_on_launch = false
 
   tags {
-    Name        = "nat-${count.index}"
+    Name        = "${var.project}-${var.environment}-nat-${count.index}"
     Environment = "${terraform.env}"
     Project     = "${var.project}"
     Owner       = "${var.owner}"
     CostCenter  = "${var.costcenter}"
     managed_by  = "terraform"
-    service     = "${var.project}"
+    service     = "${var.service}"
   }
 }
 
@@ -161,13 +161,13 @@ resource "aws_route_table" "nat" {
   }
 
   tags {
-    Name        = "nat"
+    Name        = "${var.project}-${var.environment}-nat"
     Environment = "${terraform.env}"
     Project     = "${var.project}"
     Owner       = "${var.owner}"
     CostCenter  = "${var.costcenter}"
     managed_by  = "terraform"
-    service     = "${var.project}"
+    service     = "${var.service}"
   }
 }
 
@@ -186,13 +186,13 @@ resource "aws_route_table" "igw" {
   }
 
   tags {
-    Name        = "igw"
+    Name        = "${var.project}-${var.environment}-igw"
     Environment = "${terraform.env}"
     Project     = "${var.project}"
     Owner       = "${var.owner}"
     CostCenter  = "${var.costcenter}"
     managed_by  = "terraform"
-    service     = "${var.project}"
+    service     = "${var.service}"
   }
 }
 
