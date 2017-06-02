@@ -15,7 +15,7 @@ make env
 # create lambda zip
 # must be on Linux arch because of platform specific compiled binaries
 if [[ $SKIP_BUNDLE -ne 1 ]]; then
-	bundlelambda "$LAMBDA_ZIP"
+	./bin/bundlelambda "$LAMBDA_ZIP"
 fi
 
 # run infrastructure update
