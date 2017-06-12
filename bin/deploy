@@ -5,21 +5,28 @@
 #
 set -e
 
+# <every container must start with this>
 CURRENT_DIR=$PWD
 # shellcheck disable=SC1091
 . .env
+
+####################
+# python container
+# create lambda zip
+####################
 make env
 # shellcheck disable=SC1091
 . env/bin/activate
-
-# create lambda zip
 # must be on Linux arch because of platform specific compiled binaries
 if [[ $SKIP_BUNDLE -ne 1 ]]; then
 	./bin/bundlelambda "$LAMBDA_ZIP"
 fi
 
+####################
+# terraform container
 # run infrastructure update
-cd infra || exit 1
+####################
+cd "$CURRENT_DIR/infra" || exit 1
 if [[ ! -d .terraform ]]; then
 	terraform init
 fi
@@ -27,6 +34,7 @@ if ! terraform env list 2>&1 | grep -qi "$ENVIRONMENT"; then
 	terraform env new "$ENVIRONMENT"
 fi
 terraform env select "$ENVIRONMENT"
+terraform get
 
 terraform plan \
 	-var "lambda_filename=$LAMBDA_FILENAME" \
@@ -49,21 +57,40 @@ terraform apply \
 	-var "db_pass=$DB_PASS" \
 	-var "trusted_cidrs=$TRUSTED_CIDRS"
 
-SQLALCHEMY_DATABASE_URI=$(terraform output db_url)
-API_URI="$(terraform output api_url)/healthz"
+####################
+# postgres container
+# wait for pg
+# https://stackoverflow.com/questions/14549270/check-if-database-exists-in-postgresql-using-shell
+####################
+set +e
+until psql -lqt "$(terraform output db_url)" >/dev/null 2>&1; do
+  >&2 echo "Postgres is unavailable - sleeping"
+  sleep 1
+done
+set -e
+echo "Database is available"
 
-# run db migrations
+# ####################
+# # python3 container
+# # run db migrations
+# ####################
+echo "Running SQLAlchemy DB migrations"
+SQLALCHEMY_DATABASE_URI=$(terraform output db_url)
 cd "$CURRENT_DIR" || exit 1
 export APP_CONFIG_FILE=$CURRENT_DIR/config/env.py
 export SQLALCHEMY_DATABASE_URI
 python manage.py db upgrade
 
+####################
+# # alpine container (check has wget)
 # test API deployed successfully
+####################
 set +e
-RETRIES=60
-MAX_RETRIES=1
-echo "Testing API URL: $API_URI"
-until wget -q --timeout 5 -- "$API_URI"; do
+cd "$CURRENT_DIR/infra" || exit 1
+MAX_RETRIES=60
+RETRIES=1
+echo "Testing API URL: $(terraform output api_url)/healthz"
+until wget -qO- --timeout 5 -- "$(terraform output api_url)/healthz" >/dev/null 2>&1; do
 	if [[ $RETRIES -eq $MAX_RETRIES ]]; then
 		echo "[FAIL] API URL unreachable. Max retry limit of $RETRIES reached."
 		exit 1
@@ -71,4 +98,12 @@ until wget -q --timeout 5 -- "$API_URI"; do
 	((RETRIES++))
 	sleep 1
 done
-echo "[OK] Deployment successful"
+
+set -e
+cd "$CURRENT_DIR" || exit 1
+if [[ $RETRIES -eq $MAX_RETRIES ]]; then
+	echo "[FAIL] Deployment unsuccessful - API not responding - max retries reached"
+	exit 1
+else
+	echo "[OK] Deployment successful"
+fi

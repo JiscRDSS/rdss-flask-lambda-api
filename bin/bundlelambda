@@ -23,6 +23,7 @@ setUp() {
 	fi
 	distDir=$(dirname "$1")
 	if [[ ! -d "$distDir" ]]; then
+		echo "creating dir: $distDir"
 		mkdir "$distDir"
 	fi
 	rm -f "$ARCHIVE_TMP"
@@ -53,6 +54,7 @@ run() {
 	addDependenciesToZip
 	addToZip app config ./*.py
 	mv "$ARCHIVE_TMP" "$1"
+	ls -lh "$1"
 }
 
 if [[ $(uname) == 'Linux' ]]; then
