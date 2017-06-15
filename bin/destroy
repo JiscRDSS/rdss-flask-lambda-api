@@ -1,13 +1,9 @@
 #!/usr/bin/env bash
-#
-# Dependencies - python 3, terraform, zip
-#
-#
-set -e
 
+set -e
 CURRENT_DIR=$PWD
-# shellcheck disable=SC1091
-. .env
+. ./bin/lib/activate-env.sh
+sourceEnv
 
 # run infrastructure update
 cd infra || exit 1

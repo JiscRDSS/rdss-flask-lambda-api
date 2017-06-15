@@ -1,0 +1,15 @@
+#!/bin/bash
+
+. ./bin/lib/activate-env.sh
+sourceEnv
+activatePythonEnv
+sourceDeployTerraform
+
+set +e
+until psql -lqt "$SQLALCHEMY_DATABASE_URI" >/dev/null 2>&1; do
+  >&2 echo "Postgres is unavailable - sleeping"
+  sleep 1
+done
+
+set -e
+echo "Postgres is available"

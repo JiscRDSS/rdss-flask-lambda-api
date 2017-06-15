@@ -57,7 +57,12 @@ run() {
 	ls -lh "$1"
 }
 
+
+. ./bin/lib/activate-env.sh
+sourceEnv
+
 if [[ $(uname) == 'Linux' ]]; then
+	activatePythonEnv
 	run "$1"
 else
 	echo "[FAIL]: Wrong platform - could not build lambda zip. Must be built on Linux architecture"

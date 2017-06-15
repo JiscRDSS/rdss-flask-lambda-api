@@ -1,0 +1,13 @@
+#!/bin/bash
+
+. ./bin/lib/activate-env.sh
+sourceEnv
+sourceDeployTerraform
+
+echo "Running SQLAlchemy DB migrations"
+export APP_CONFIG_FILE=$PWD/config/env.py
+export SQLALCHEMY_DATABASE_URI
+echo "\$APP_CONFIG_FILE: $APP_CONFIG_FILE"
+echo "\$SQLALCHEMY_DATABASE_URI: $SQLALCHEMY_DATABASE_URI"
+python manage.py db upgrade
+
