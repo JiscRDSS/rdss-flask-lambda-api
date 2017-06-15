@@ -1,0 +1,43 @@
+#!/bin/bash
+
+set -e
+CURRENT_DIR=$PWD
+DEPLOY_OUTPUT="$CURRENT_DIR/.env.deploy"
+. ./bin/lib/activate-env.sh
+sourceEnv
+
+cd "$CURRENT_DIR/infra" || exit 1
+if [[ ! -d .terraform ]]; then
+	terraform init
+fi
+if ! terraform env list 2>&1 | grep -qi "$ENVIRONMENT"; then
+	terraform env new "$ENVIRONMENT"
+fi
+terraform env select "$ENVIRONMENT"
+terraform get
+
+terraform plan \
+	-var "lambda_filename=$LAMBDA_FILENAME" \
+	-var "region=$REGION" \
+	-var "account_id=$ACCOUNT_ID" \
+	-var "lambda_function_name=$LAMBDA_FUNCTION_NAME" \
+	-var "db_instance_type=$DB_INSTANCE_TYPE" \
+	-var "db_name=$DB_NAME" \
+	-var "db_user=$DB_USER" \
+	-var "db_pass=$DB_PASS" \
+	-var "trusted_cidrs=$TRUSTED_CIDRS"
+
+terraform apply \
+	-var "lambda_filename=$LAMBDA_FILENAME" \
+	-var "region=$REGION" \
+	-var "account_id=$ACCOUNT_ID" \
+	-var "db_instance_type=$DB_INSTANCE_TYPE" \
+	-var "db_name=$DB_NAME" \
+	-var "db_user=$DB_USER" \
+	-var "db_pass=$DB_PASS" \
+	-var "trusted_cidrs=$TRUSTED_CIDRS"
+
+echo "SQLALCHEMY_DATABASE_URI=$(terraform output db_url)" > "$DEPLOY_OUTPUT"
+echo "API_URL=$(terraform output api_url)" >> "$DEPLOY_OUTPUT"
+cd "$CURRENT_DIR" || exit 1
+

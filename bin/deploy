@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+
+set -e
+. ./bin/lib/activate-env.sh
+sourceEnv
+
+####################
+# python3 container
+# Dependencies - python 3, zip
+# creates lambda zip
+# must be on Linux arch because of platform specific compiled binaries
+####################
+if [[ $SKIP_BUNDLE -ne 1 ]]; then
+	./bin/bundlelambda "$LAMBDA_ZIP"
+fi
+
+####################
+# terraform container
+####################
+./bin/deployterraform
+
+####################
+# python3 container
+####################
+./bin/dbmigrations
+
+####################
+# postgres container
+####################
+./bin/polldb
+
+####################
+# alpine container (check has wget)
+####################
+./bin/pollapi

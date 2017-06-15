@@ -1,0 +1,53 @@
+version: '3'
+services:
+  db:
+    image: postgres:9.6-alpine
+    environment:
+      - POSTGRES_PASSWORD=app
+      - POSTGRES_USER=app
+      - POSTGRES_DB=app
+    ports:
+      - "5432:5432"
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - .:/usr/src/app/
+    depends_on:
+      - db
+    working_dir: /usr/src/app/
+    entrypoint: ["waitforit", "db:5432", "--", "make server-docker"]
+    environment:
+      - PATH=./bin:$PATH
+      - SQLALCHEMY_DATABASE_URI=postgres://app:app@db/app
+      - APP_CONFIG_FILE=../config/env.py
+    ports:
+      - "5000:5000"
+
+  test:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - .:/usr/src/app/
+    depends_on:
+      - db
+    working_dir: /usr/src/app/
+    entrypoint: ["waitforit", "db:5432", "--", "make test-docker"]
+    environment:
+      - PATH=./bin:$PATH
+      - SQLALCHEMY_DATABASE_URI=postgres://app:app@db/app
+      - APP_CONFIG_FILE=../config/env.py
+
+  # zip:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile
+  #   volumes:
+  #     - .:/usr/src/app
+  #   working_dir: /usr/src/app/
+  #   entrypoint: ["bundlelambda", $LAMBDA_ZIP]
+  #   environment:
+  #     - PATH=./bin:$PATH

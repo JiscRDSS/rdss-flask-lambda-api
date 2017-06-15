@@ -1,0 +1,14 @@
+version: '2'
+
+services:
+  jenkins:
+    image: jenkins:2.46.2-alpine
+#    build: .
+    ports:
+      - 8080:8080
+      - 50000:50000
+    volumes:
+      - data:/var/jenkins_home
+
+volumes:
+  data: {}

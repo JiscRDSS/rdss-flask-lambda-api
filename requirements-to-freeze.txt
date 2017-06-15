@@ -1,0 +1,14 @@
+autopep8
+# app
+flask
+flask-migrate
+Flask-SQLAlchemy
+marshmallow
+marshmallow-sqlalchemy
+pep8
+pre-commit
+psycopg2
+pytest
+pytest-cov
+requests
+SQLAlchemy
